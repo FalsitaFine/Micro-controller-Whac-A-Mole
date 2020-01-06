@@ -1,0 +1,87 @@
+# Micro-controller-Whac-A-Mole
+A Whac-A-Mole Game on Micro controller and its corresponding API
+
+It is an sample project shows how a PIC24 controller can drive the iLED device.
+
+Intro:
+
+It contains two libraries: one is for 8 x 8 LED matrix, and the other is for a buzzer.
+The matrix library has three layers, means to send a single bit to the matrix, control each pixel of the matrix, and control multiple pixels to print out something together.
+The buzzer library has only one function: make a voice with given frequency.
+Hardware description:
+The keypad and LCD screen is all the same with the devices used in the previous labs.(LAB 3 and 5).
+The 8 x 8 Matrix is the most important device in this project. It is formed by 64 iLEDs, each iLED(pixel) is controled by a 24-bit signal.(8 bit red, 8 bit green and 8 bit blue). Unlike single LED, we need to send 64 signals to the matrix in order to control all these 8 x 8 pixels, the first pixel will take its signal, and then send the rest 63 signals to the rest pixels, and etc.
+The buzzer is a simple device, it has two pins, one connect to the ground and another connect to an output pin of the PIC, when there are voltage difference(should be within 3 ~ 28V) between these two pins, it will make some voice. By giving signals in different frequence, we can make different voices.
+
+ 
+Full documentation:
+//Layer 1
+void write0c();
+Send a bit “0” to the matrix.
+void write1c();
+Send a bit “1” to the matrix.
+//Layer 2
+void writeblue();
+Make current pixel blue.
+void writered();
+Make current pixel red.
+void writegreen();
+Make current pixel green.
+void writeColor (int r, int g, int b);
+Make current pixel print a color represented by r, g and b.
+void writePacCol (uint32_t PackedColor); Make current pixel print a packed color.
+void drawFrame(int frame);
+Make current pixel print a frame.
+Control the pixel with a single int frame, the frame is in [0,255], when it is 0, the pixel is totally blue, when it is 255, the pixel is totally red.
+uint32_t packColor(int Red, int Grn, int Blu); Packing Red, Grn and Blu into one packedColor.
+int getR(uint32_t RGBval); Get Red from a packedColor.
+int getG(uint32_t RGBval);
+Get Green from a packedColor.
+int getB(uint32_t RGBval); Get Blue from a packedColor.
+
+//Layer 3
+void Paintpurecolor(int Red, int Grn, int Blu); Paint the whole matrix into a given color.
+void Writesinglepixel(uint32_t PackedColor, int index); Write a given color to a particular pixel with an index.
+void erase();
+Off all LEDs on the matrix;
+uint32_t wheel(int wheelpos); void runwheel();
+Generate a wheel on the matrix.
+//BuzzerAPI
+void buzzerapi(int freq);
+Generate a sound by giving a freq to the buzzer.
+
+Usage example:
+Basic usage:
+If you want to test your LED matrix, try:
+void Paintpurecolor(int 255, int 0, int 0);
+This will made the whole matrix become red.
+You can also try to light up one single pixel by using:
+void Writesinglepixel(uint32_t PackedColor, int index);
+It can be used to light up a single pixel with the color you want.
+Advanced usage:
+Here is an example from our project:
+if(moleindex == 1){ drawFrame(color); drawFrame(color);
+for(i = 0; i < 6;i++){ offled();
+} drawFrame(color); drawFrame(color);
+for(i = 0; i < 54;i++){ offled();
+}
+}
+First, current pixel is 0,0, the drawFrame(color) will light the first pixel with the value “color” up.
+Then current pixel is 0,1, the second drawFrame(color) will light up the second pixel.
+Then it will off some LEDs until current pixel become (1,0), and then light up pixel(1,0) and (1,1), which will form a 2x2 square.
+And here is another example:
+void wingame(){ int i = 0;
+for(i = 0; i < 6000; i++){ delay5000us();
+}
+
+Paintpurecolor(255 , 0, 0); for(i = 0; i < 3000; i++){ delay5000us();
+}
+Paintpurecolor(0, 255, 0); for(i = 0; i < 3000; i++){ delay5000us();
+}
+Paintpurecolor(0, 0, 255); for(i = 0; i < 3000; i++){ delay5000us();
+}
+for(i = 0; i < 64; i++){ offled();
+} }
+In this function, we make the whole LED become Red, Green, and then Blue by using Paintpurecolor.
+You can see more details in our API.c, we add comments there explaining how to use these functions.
+
